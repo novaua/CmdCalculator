@@ -18,6 +18,15 @@ namespace ExprCalculatorTests
 			Assert::AreEqual<double>(2, res);
 		}
 
+		TEST_METHOD(TestNumber)
+		{
+			auto input = "77";
+			auto rp = toReversePolish(input);
+			auto res = evaluate(rp);
+
+			Assert::AreEqual<double>(77, res);
+		}
+
 		TEST_METHOD(TestBraces)
 		{
 			auto input = "(1 + 1) * (2+2)";
@@ -25,6 +34,15 @@ namespace ExprCalculatorTests
 			auto res = evaluate(rp);
 
 			Assert::AreEqual<double>(8, res);
+		}
+
+		TEST_METHOD(TestInnerBraces)
+		{
+			auto input = "(1 + 1 * (2 + 2 * (3 + 3))) * (2 + 2)";
+			auto rp = toReversePolish(input);
+			auto res = evaluate(rp);
+
+			Assert::AreEqual<double>((1 + 1 * (2 + 2 * (3 + 3))) * (2 + 2), res);
 		}
 
 		TEST_METHOD(TestPow)
