@@ -63,6 +63,15 @@ namespace ExprCalculatorTests
 			Assert::AreEqual<double>(8, res);
 		}
 
+		TEST_METHOD(TestDivideByZero)
+		{
+			auto input = "16 / (3-1-2)";
+			auto rp = toReversePolish(input);
+			auto res = evaluate(rp);
+
+			Assert::AreEqual<double>(INFINITY, res);
+		}
+
 		TEST_METHOD(TestNoClosingBracketError)
 		{
 			Assert::ExpectException<std::logic_error>([]() {
