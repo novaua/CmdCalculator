@@ -2,7 +2,7 @@
  ******************************************************************
  *           C++ Basic Mathematical Calculator                    *
  *                                                                *
- * Author: Vitaly German (2021)                                   *
+ * Author: VitalyG (2021)                                   *
  * URL: https://github.com/novaua/							      *
  *                                                                *
  * Copyright notice:                                              *
@@ -17,38 +17,19 @@
  ******************************************************************
 */
 
+#include "ExprCalculator.h"
+
 #include <string>
 #include <stack>
 #include <stdexcept>
 #include <cmath> // std::pow
 
-enum class Priority {
-	Nop,
-	Low,
-	High
-};
-
-const char DELIM = '|';
-
-Priority isOperator(char c) {
-	static const std::string OPS = "+-/*^";
-	auto pos = OPS.find(c);
-
-	if (pos == std::string::npos)
-		return Priority::Nop;
-
-	if (pos < 2)
-		return Priority::Low;
-
-	return Priority::High;
-}
-
-std::string toReversePolish(const std::string& expr)
+List toReversePolish(const std::string& expr)
 {
-	std::stack<char> opStack;
-	std::string result;
+	std::stack<std::string> opStack;
+	List result;
 
-	opStack.push('(');
+	opStack.push("(");
 	auto input = expr + ')';
 	size_t i = 0;
 	for (; !opStack.empty(); i++)
@@ -58,13 +39,13 @@ std::string toReversePolish(const std::string& expr)
 			continue;
 
 		if (currentToken == '(') {
-			opStack.push('(');
+			opStack.push("(");
 		}
 		else if (currentToken == ')')
 		{
-			while (opStack.top() != '(')
+			while (opStack.top() != "(")
 			{
-				result += opStack.top();
+				result.push_back(opStack.top());
 				opStack.pop();
 				if (opStack.empty())
 					throw std::logic_error("Invalid input:'No opening bracket found.'");
@@ -74,35 +55,35 @@ std::string toReversePolish(const std::string& expr)
 		}
 		else if (std::isdigit(currentToken))
 		{
-			result += DELIM;
+			std::string digit;
 			while (i < input.size() && (input[i] == '.' || std::isdigit(input[i])))
 			{
-				result += input[i];
+				digit += input[i];
 				i++;
 			}
 
 			i--;
-			result += DELIM;
+			result.push_back(digit);
 		}
 		else if (isOperator(currentToken) == Priority::High)
 		{
 			while (!opStack.empty() && isOperator(opStack.top()) == Priority::High)
 			{
-				result += opStack.top();
+				result.push_back(opStack.top());
 				opStack.pop();
 			}
 
-			opStack.push(currentToken);
+			opStack.push(std::string(1, currentToken));
 		}
 		else if (isOperator(currentToken) == Priority::Low)
 		{
 			while (!opStack.empty() && isOperator(opStack.top()) != Priority::Nop)
 			{
-				result += opStack.top();
+				result.push_back(opStack.top());
 				opStack.pop();
 			}
 
-			opStack.push(currentToken);
+			opStack.push(std::string(1, currentToken));
 		}
 		else
 		{
@@ -122,48 +103,47 @@ std::string toReversePolish(const std::string& expr)
 	return result;
 }
 
-double evaluate(const std::string& postfix)
+double evaluate(const List& postfix)
 {
 	std::stack<double> valueStack;
-	for (size_t i = 0; i < postfix.length(); i++)
+	for (const auto& element : postfix)
 	{
-		if (postfix[i] == DELIM)
+		if (isOperator(element) == Priority::Nop)
 		{
-			i++;
-			std::string tmp;
-			while (postfix[i] != DELIM)
-				tmp += postfix[i++];
-
-			valueStack.push(stod(tmp));
+			valueStack.push(stod(element));
 		}
 		else
 		{
-			double raval = valueStack.top();
+			auto rightValue = valueStack.top();
 			valueStack.pop();
-			switch (postfix[i])
+			switch (element[0])
 			{
 			case '+':
-				valueStack.top() += raval;
+				valueStack.top() += rightValue;
 				break;
 
 			case '-':
-				valueStack.top() -= raval;
+				valueStack.top() -= rightValue;
 				break;
 
 			case '*':
-				valueStack.top() *= raval;
+				valueStack.top() *= rightValue;
 				break;
 
 			case '/':
-				valueStack.top() /= raval;
+				valueStack.top() /= rightValue;
 				break;
 
 			case '^':
-				valueStack.top() = std::pow(valueStack.top(), raval);
+				valueStack.top() = std::pow(valueStack.top(), rightValue);
 				break;
+
+			default:
+				throw std::logic_error(std::string("Unknown operator: '") + element + "'.");
 			}
 		}
 	}
 
 	return valueStack.top();
 }
+
