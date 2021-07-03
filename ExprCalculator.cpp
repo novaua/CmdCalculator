@@ -24,6 +24,26 @@
 #include <stdexcept>
 #include <cmath> // std::pow
 
+enum class Priority {
+	None,
+	Low,
+	High
+};
+
+template<class T>
+Priority isOperator(const T& c) {
+	static const std::string OPS = "+-/*^";
+	auto pos = OPS.find(c);
+
+	if (pos == std::string::npos)
+		return Priority::None;
+
+	if (pos < 2)
+		return Priority::Low;
+
+	return Priority::High;
+}
+
 List toReversePolish(const std::string& expr)
 {
 	std::stack<std::string> opStack;
@@ -63,7 +83,7 @@ List toReversePolish(const std::string& expr)
 			}
 
 			i--;
-			result.push_back(digit);
+			result.push_back(std::stod(digit));
 		}
 		else if (isOperator(currentToken) == Priority::High)
 		{
@@ -77,7 +97,7 @@ List toReversePolish(const std::string& expr)
 		}
 		else if (isOperator(currentToken) == Priority::Low)
 		{
-			while (!opStack.empty() && isOperator(opStack.top()) != Priority::Nop)
+			while (!opStack.empty() && isOperator(opStack.top()) != Priority::None)
 			{
 				result.push_back(opStack.top());
 				opStack.pop();
@@ -103,47 +123,54 @@ List toReversePolish(const std::string& expr)
 	return result;
 }
 
+// helper type for the visitor
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+
+// explicit deduction guide (not needed as of C++20)
+template<class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+
 double evaluate(const List& postfix)
 {
 	std::stack<double> valueStack;
 	for (const auto& element : postfix)
 	{
-		if (isOperator(element) == Priority::Nop)
-		{
-			valueStack.push(stod(element));
-		}
-		else
-		{
-			auto rightValue = valueStack.top();
-			valueStack.pop();
-			switch (element[0])
+		std::visit(overloaded{
+			[&valueStack](double value)
 			{
-			case '+':
-				valueStack.top() += rightValue;
-				break;
+				valueStack.push(value);
+			},
+			[&valueStack](const std::string& operation)
+			{
+				auto rightValue = valueStack.top();
+				valueStack.pop();
+				switch (operation[0])
+				{
+				case '+':
+					valueStack.top() += rightValue;
+					break;
 
-			case '-':
-				valueStack.top() -= rightValue;
-				break;
+				case '-':
+					valueStack.top() -= rightValue;
+					break;
 
-			case '*':
-				valueStack.top() *= rightValue;
-				break;
+				case '*':
+					valueStack.top() *= rightValue;
+					break;
 
-			case '/':
-				valueStack.top() /= rightValue;
-				break;
+				case '/':
+					valueStack.top() /= rightValue;
+					break;
 
-			case '^':
-				valueStack.top() = std::pow(valueStack.top(), rightValue);
-				break;
+				case '^':
+					valueStack.top() = std::pow(valueStack.top(), rightValue);
+					break;
 
-			default:
-				throw std::logic_error(std::string("Unknown operator: '") + element + "'.");
-			}
-		}
+				default:
+					throw std::logic_error(std::string("Unknown operation: '") + operation + "'.");
+				}
+			},
+		}, element);
 	}
 
 	return valueStack.top();
 }
-

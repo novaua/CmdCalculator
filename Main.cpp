@@ -1,18 +1,18 @@
 #include "ExprCalculator.h"
 
-const char delimiter = '|';
+const char delimiter = ' ';
 
 void print(const List& inputList)
 {
 	for (const auto& element : inputList)
 	{
-		if (isOperator(element) == Priority::Nop)
+		if (std::holds_alternative<double>(element))
 		{
-			std::cout << delimiter << element << delimiter;
+			std::cout << std::get<double>(element) << delimiter;
 		}
 		else
 		{
-			std::cout << element;
+			std::cout << std::get<std::string>(element) << delimiter;
 		}
 	}
 

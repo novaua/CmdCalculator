@@ -1,5 +1,5 @@
 # Basic Expression Calculator
-Command line expression calculator written using C++ using MSVS 2019. Accepted operations are '+ - * ^'. Parenthesis are supported as well.
+Command line expression calculator written using C++17 MSVC 2019. Accepted operations are '+ - * ^' and parenthesis.
 
 Interactive usage example in Debug mode:
 
@@ -7,11 +7,11 @@ Interactive usage example in Debug mode:
 C:\projects\ExprCalculator\x64\Debug>ExprCalculator.exe
 Enter expression ('e' or enter to exit)
 3 + 3 * (44 + 5)
-|3||3||44||5|+*+
+3 3 44 5 + * +
 150
 Enter expression ('e' or enter to exit)
 2^2
-|2||2|^
+2 2 ^
 4
 ```
 

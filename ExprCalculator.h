@@ -22,29 +22,11 @@
 #include <string>
 #include <iostream>
 #include <list>
+#include <variant>
 
-typedef std::list<std::string> List;
+typedef std::list<std::variant<double, std::string>> List;
 
 List toReversePolish(const std::string& expr);
 
 double evaluate(const List& postfix);
 
-enum class Priority {
-	Nop,
-	Low,
-	High
-};
-
-template<class T>
-Priority isOperator(const T& c) {
-	static const std::string OPS = "+-/*^";
-	auto pos = OPS.find(c);
-
-	if (pos == std::string::npos)
-		return Priority::Nop;
-
-	if (pos < 2)
-		return Priority::Low;
-
-	return Priority::High;
-}
