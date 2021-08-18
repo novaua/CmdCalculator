@@ -21,6 +21,9 @@ Batch usage example:
 C:\projects\ExprCalculator\x64\Debug>ExprCalculator.exe 2+2*2+1
 7
 ```
-Known limitations/issues
-Unary minus is not supported
-Grouping of power operation is from lef to right i.e. 2^3^2 == 2^(3^2) ==> 512
+Known limitations/issues: 
+* Unary minus is not supported
+* Grouping of power operation is from lef to right i.e. 
+```
+2^3^2 == 2^(3^2) ==> 512
+```
